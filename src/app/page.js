@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import GlassCard from "@/components/ui/GlassCard";
+import { API_BASE_URL } from "@/lib/constants";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("notes");
@@ -83,7 +84,7 @@ export default function HomePage() {
             </Button>
           </Link>
           <a
-            href="http://127.0.0.1:8000/api/v1/docs/"
+            href={`${API_BASE_URL}/api/v1/docs/`}
             target="_blank"
             rel="noopener noreferrer"
           >

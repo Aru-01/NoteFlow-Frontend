@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
@@ -17,6 +17,7 @@ import {
   ArrowRight,
   ShieldCheck,
   LogOut,
+  ChevronDown,
   User as UserIcon
 } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -26,7 +27,11 @@ import { useAuth } from "@/context/AuthContext";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [notesDropdown, setNotesDropdown] = useState(false);
+  const [mobileNotesExpanded, setMobileNotesExpanded] = useState(true);
+
   const pathname = usePathname();
+  const dropdownRef = useRef(null);
   const { theme, toggleTheme, mounted } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -38,24 +43,24 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Base navigation links
-  const baseNavLinks = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "Notes", href: "/notes", icon: FileText },
-    { name: "Community Feed", href: "/posts", icon: Users },
-    { name: "About Us", href: "/about", icon: Info },
-    { name: "Contact Us", href: "/contact", icon: Mail },
-  ];
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setNotesDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  // If user role is admin from genuine API, dynamically add "User Manage" link
+  // Close dropdown when route changes
+  useEffect(() => {
+    setNotesDropdown(false);
+    setIsOpen(false);
+  }, [pathname]);
+
   const isAdmin = user?.role === "admin";
-  const navLinks = isAdmin
-    ? [
-        ...baseNavLinks.slice(0, 3), // Home, Notes, Community Feed
-        { name: "User Manage", href: "/admin/users", icon: ShieldCheck, isAdminOnly: true },
-        ...baseNavLinks.slice(3),    // About Us, Contact Us
-      ]
-    : baseNavLinks;
 
   return (
     <header
@@ -86,29 +91,149 @@ export default function Navbar() {
 
           {/* Desktop Nav Items */}
           <nav className="hidden md:flex items-center gap-0.5">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              const isSpecialAdmin = link.isAdminOnly;
+            {/* 1. Home */}
+            <Link
+              href="/"
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                pathname === "/"
+                  ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+              }`}
+            >
+              Home
+            </Link>
 
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                    isActive
-                      ? isSpecialAdmin
-                        ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-semibold"
-                        : "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
-                      : isSpecialAdmin
-                      ? "text-blue-600/90 dark:text-blue-400/90 hover:bg-blue-50/50 dark:hover:bg-blue-950/30"
+            {/* 2. Notes (With Sub-links for Admin) */}
+            {isAdmin ? (
+              <div 
+                ref={dropdownRef} 
+                className="relative"
+                onMouseEnter={() => setNotesDropdown(true)}
+                onMouseLeave={() => setNotesDropdown(false)}
+              >
+                <button
+                  onClick={() => setNotesDropdown(!notesDropdown)}
+                  className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                    pathname.startsWith("/notes")
+                      ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
                   }`}
                 >
-                  {isSpecialAdmin && <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />}
-                  <span>{link.name}</span>
-                </Link>
-              );
-            })}
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Notes</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${notesDropdown ? "rotate-180" : ""}`} />
+                </button>
+
+                {/* Admin Notes Sub-menu Dropdown */}
+                <AnimatePresence>
+                  {notesDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 mt-1 w-52 p-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121215] shadow-xl z-50 space-y-0.5"
+                    >
+                      <div className="px-2.5 py-1 text-[10px] font-mono uppercase text-zinc-400">
+                        Admin Notes Hub
+                      </div>
+
+                      <Link
+                        href="/notes?view=my"
+                        className="flex items-start gap-2 p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
+                      >
+                        <FileText className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-900 dark:text-white">
+                            My Notes
+                          </p>
+                          <p className="text-[11px] text-zinc-500">
+                            Notes authored by you
+                          </p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        href="/notes?view=all"
+                        className="flex items-start gap-2 p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
+                      >
+                        <Users className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-900 dark:text-white">
+                            Users&apos; Notes
+                          </p>
+                          <p className="text-[11px] text-zinc-500">
+                            All user notes in system
+                          </p>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link
+                href="/notes"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  pathname === "/notes"
+                    ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+                }`}
+              >
+                Notes
+              </Link>
+            )}
+
+            {/* 3. Community Feed */}
+            <Link
+              href="/posts"
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                pathname === "/posts"
+                  ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+              }`}
+            >
+              Community Feed
+            </Link>
+
+            {/* 4. User Manage (Admin only) */}
+            {isAdmin && (
+              <Link
+                href="/admin/users"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  pathname === "/admin/users"
+                    ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-semibold"
+                    : "text-blue-600/90 dark:text-blue-400/90 hover:bg-blue-50/50 dark:hover:bg-blue-950/30"
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                <span>User Manage</span>
+              </Link>
+            )}
+
+            {/* 5. About Us */}
+            <Link
+              href="/about"
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                pathname === "/about"
+                  ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+              }`}
+            >
+              About Us
+            </Link>
+
+            {/* 6. Contact Us */}
+            <Link
+              href="/contact"
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                pathname === "/contact"
+                  ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+              }`}
+            >
+              Contact Us
+            </Link>
           </nav>
 
           {/* Right Section: Theme Toggle & Real Auth Buttons */}
@@ -129,11 +254,15 @@ export default function Navbar() {
             {/* Authenticated vs Guest View */}
             {isAuthenticated ? (
               <div className="flex items-center gap-2 pl-1">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 text-xs text-zinc-700 dark:text-zinc-300">
-                  <div className="w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-[10px]">
+                <Link
+                  href="/profile"
+                  title="Manage Your Profile"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 hover:bg-zinc-200/70 dark:bg-zinc-800 dark:hover:bg-zinc-700/70 border border-zinc-200/80 dark:border-zinc-700/60 text-xs text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer group"
+                >
+                  <div className="w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-[10px] group-hover:scale-105 transition-transform">
                     {user?.username ? user.username[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : "U"}
                   </div>
-                  <span className="font-medium max-w-[130px] truncate">
+                  <span className="font-medium max-w-[120px] truncate group-hover:text-zinc-900 dark:group-hover:text-white">
                     {user?.username || user?.email?.split("@")[0]}
                   </span>
                   {isAdmin && (
@@ -141,7 +270,7 @@ export default function Navbar() {
                       admin
                     </span>
                   )}
-                </div>
+                </Link>
 
                 <button
                   onClick={logout}
@@ -203,38 +332,110 @@ export default function Navbar() {
             className="md:hidden bg-white dark:bg-[#09090b] border-b border-zinc-200 dark:border-zinc-800 px-4 pt-2 pb-5 overflow-hidden shadow-lg"
           >
             <div className="flex flex-col gap-1">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = pathname === link.href;
-                const isSpecialAdmin = link.isAdminOnly;
+              <Link
+                href="/"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+              >
+                <Home className="w-4 h-4 opacity-80" />
+                <span>Home</span>
+              </Link>
 
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive
-                        ? isSpecialAdmin
-                          ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-semibold"
-                          : "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800"
-                        : isSpecialAdmin
-                        ? "text-blue-600 dark:text-blue-400 font-medium"
-                        : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 opacity-80" />
-                    <span>{link.name}</span>
-                    {isSpecialAdmin && (
-                      <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
-                        Admin
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
+              {/* Mobile Notes (Expandable for Admin) */}
+              {isAdmin ? (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-zinc-900 dark:text-white bg-zinc-50 dark:bg-zinc-800/50">
+                    <div className="flex items-center gap-2.5">
+                      <FileText className="w-4 h-4 text-blue-500" />
+                      <span>Notes</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                      Admin Sub-nav
+                    </span>
+                  </div>
+
+                  {/* Sub-links */}
+                  <div className="pl-6 space-y-1">
+                    <Link
+                      href="/notes?view=my"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      <span>My Notes</span>
+                    </Link>
+
+                    <Link
+                      href="/notes?view=all"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span>Users&apos; Notes</span>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  href="/notes"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                >
+                  <FileText className="w-4 h-4 opacity-80" />
+                  <span>Notes</span>
+                </Link>
+              )}
+
+              <Link
+                href="/posts"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+              >
+                <Users className="w-4 h-4 opacity-80" />
+                <span>Community Feed</span>
+              </Link>
+
+              {isAdmin && (
+                <Link
+                  href="/admin/users"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>User Manage</span>
+                </Link>
+              )}
+
+              <Link
+                href="/about"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+              >
+                <Info className="w-4 h-4 opacity-80" />
+                <span>About Us</span>
+              </Link>
+
+              <Link
+                href="/contact"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+              >
+                <Mail className="w-4 h-4 opacity-80" />
+                <span>Contact Us</span>
+              </Link>
 
               <div className="h-px bg-zinc-200 dark:bg-zinc-800 my-2" />
+
+              {isAuthenticated && (
+                <Link
+                  href="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                >
+                  <UserIcon className="w-4 h-4 opacity-80" />
+                  <span>My Profile & Settings</span>
+                </Link>
+              )}
 
               <div className="flex flex-col gap-2 pt-1">
                 {isAuthenticated ? (
