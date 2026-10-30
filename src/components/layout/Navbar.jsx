@@ -17,8 +17,7 @@ import {
   ArrowRight,
   ShieldCheck,
   LogOut,
-  UserCheck,
-  ChevronDown
+  User as UserIcon
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useTheme } from "@/context/ThemeContext";
@@ -27,10 +26,9 @@ import { useAuth } from "@/context/AuthContext";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const pathname = usePathname();
   const { theme, toggleTheme, mounted } = useTheme();
-  const { user, isAuthenticated, logout, setMockRole } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,7 +47,7 @@ export default function Navbar() {
     { name: "Contact Us", href: "/contact", icon: Mail },
   ];
 
-  // If user role is admin, dynamically add "User Manage" link
+  // If user role is admin from genuine API, dynamically add "User Manage" link
   const isAdmin = user?.role === "admin";
   const navLinks = isAdmin
     ? [
@@ -80,7 +78,7 @@ export default function Navbar() {
               </span>
               {isAdmin && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-semibold">
-                  Admin Mode
+                  Admin
                 </span>
               )}
             </div>
@@ -113,68 +111,8 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Right Section: Role Simulator, Theme Toggle & Auth Buttons */}
+          {/* Right Section: Theme Toggle & Real Auth Buttons */}
           <div className="hidden sm:flex items-center gap-2">
-            {/* Role Tester / Switcher Pill */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200/70 transition-colors cursor-pointer"
-                title="Switch demo view role"
-              >
-                <span>Role: <strong>{user?.role ? user.role : "Guest"}</strong></span>
-                <ChevronDown className="w-3 h-3 opacity-60" />
-              </button>
-
-              <AnimatePresence>
-                {showRoleMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    className="absolute right-0 mt-1 w-36 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121215] shadow-lg text-xs z-50"
-                  >
-                    <div className="px-2.5 py-1 text-[10px] font-mono text-zinc-400 uppercase">
-                      Preview Role
-                    </div>
-                    <button
-                      onClick={() => {
-                        setMockRole(null);
-                        setShowRoleMenu(false);
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${
-                        !user ? "font-semibold text-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"
-                      }`}
-                    >
-                      Guest (Logged Out)
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMockRole("user");
-                        setShowRoleMenu(false);
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${
-                        user?.role === "user" ? "font-semibold text-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400"
-                      }`}
-                    >
-                      Regular User
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMockRole("admin");
-                        setShowRoleMenu(false);
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-blue-600 dark:text-blue-400 ${
-                        user?.role === "admin" ? "font-bold" : ""
-                      }`}
-                    >
-                      ★ Admin (Shows Nav)
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             {/* Light / Dark Mode Toggle */}
             <button
               onClick={toggleTheme}
@@ -191,14 +129,20 @@ export default function Navbar() {
             {/* Authenticated vs Guest View */}
             {isAuthenticated ? (
               <div className="flex items-center gap-2 pl-1">
-                <div className="flex items-center gap-1.5 text-xs text-zinc-700 dark:text-zinc-300">
-                  <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center font-bold text-[10px]">
-                    {user?.username ? user.username[0].toUpperCase() : "U"}
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 text-xs text-zinc-700 dark:text-zinc-300">
+                  <div className="w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-[10px]">
+                    {user?.username ? user.username[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : "U"}
                   </div>
-                  <span className="hidden lg:inline text-xs font-medium">
+                  <span className="font-medium max-w-[130px] truncate">
                     {user?.username || user?.email?.split("@")[0]}
                   </span>
+                  {isAdmin && (
+                    <span className="text-[10px] font-mono px-1 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                      admin
+                    </span>
+                  )}
                 </div>
+
                 <button
                   onClick={logout}
                   title="Sign Out"
@@ -258,31 +202,6 @@ export default function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden bg-white dark:bg-[#09090b] border-b border-zinc-200 dark:border-zinc-800 px-4 pt-2 pb-5 overflow-hidden shadow-lg"
           >
-            {/* Quick role toggle on mobile */}
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800 text-xs">
-              <span className="text-zinc-500 text-[11px]">Preview State:</span>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setMockRole(null)}
-                  className={`px-2 py-0.5 rounded text-[11px] ${!user ? "bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"}`}
-                >
-                  Guest
-                </button>
-                <button
-                  onClick={() => setMockRole("user")}
-                  className={`px-2 py-0.5 rounded text-[11px] ${user?.role === "user" ? "bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"}`}
-                >
-                  User
-                </button>
-                <button
-                  onClick={() => setMockRole("admin")}
-                  className={`px-2 py-0.5 rounded text-[11px] ${user?.role === "admin" ? "bg-blue-600 text-white font-semibold" : "bg-zinc-100 dark:bg-zinc-800 text-blue-600 dark:text-blue-400"}`}
-                >
-                  Admin
-                </button>
-              </div>
-            </div>
-
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
@@ -315,7 +234,7 @@ export default function Navbar() {
                 );
               })}
 
-              <div className="h-px bg-zinc-200 dark:border-zinc-800 my-2" />
+              <div className="h-px bg-zinc-200 dark:bg-zinc-800 my-2" />
 
               <div className="flex flex-col gap-2 pt-1">
                 {isAuthenticated ? (
