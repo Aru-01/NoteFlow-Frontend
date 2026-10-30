@@ -3,16 +3,20 @@
 export default function AmbientBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden select-none">
-      {/* Neutral top lighting highlight */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-64 bg-radial from-stone-200/40 dark:from-zinc-800/20 to-transparent blur-2xl" />
+      {/* Top Ambient Glow Orb */}
+      <div className="absolute -top-48 left-1/2 -translate-x-1/2 w-[900px] sm:w-[1100px] h-[550px] bg-gradient-to-b from-blue-500/12 via-indigo-500/6 to-transparent dark:from-blue-600/18 dark:via-purple-600/10 dark:to-transparent rounded-full blur-3xl" />
 
-      {/* Clean, minimalist neutral dot pattern */}
+      {/* Subtle Side Color Fill */}
+      <div className="absolute top-1/4 -left-36 w-80 h-80 bg-blue-400/5 dark:bg-blue-500/10 rounded-full blur-3xl" />
+      <div className="absolute top-2/3 -right-36 w-96 h-96 bg-indigo-400/5 dark:bg-purple-500/10 rounded-full blur-3xl" />
+
+      {/* Elegant Radial Dot Matrix Pattern */}
       <div 
-        className="absolute inset-0 opacity-[0.4] dark:opacity-[0.25]"
+        className="absolute inset-0 opacity-[0.45] dark:opacity-[0.22] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_85%)]"
         style={{
-          backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`,
-          backgroundSize: "24px 24px",
-          color: "var(--dot-color, #d4d4d8)"
+          backgroundImage: `radial-gradient(currentColor 1.2px, transparent 1.2px)`,
+          backgroundSize: "28px 28px",
+          color: "var(--dot-color, #a1a1aa)"
         }}
       />
     </div>

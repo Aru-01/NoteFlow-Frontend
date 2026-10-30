@@ -327,7 +327,7 @@ function NotesContent() {
           <Lock className="w-6 h-6" />
         </div>
         <div className="space-y-2">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-blue-600 dark:text-blue-400 font-semibold">
+          <span className="text-[11px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-semibold">
             Authentication Required
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white">
@@ -588,7 +588,7 @@ function NotesContent() {
                 {/* Priority & Status Badges */}
                 <div className="flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                   <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded uppercase font-semibold border ${getPriorityBadge(
+                    className={`text-[10px] px-2 py-0.5 rounded uppercase font-semibold border ${getPriorityBadge(
                       note.priority
                     )}`}
                   >
@@ -630,7 +630,7 @@ function NotesContent() {
               <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
                 {/* Dates Information */}
                 {(note.start_date || note.approx_end_date) && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-mono">
+                  <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-medium">
                     <Calendar className="w-3 h-3 text-zinc-400" />
                     <span>
                       {note.start_date || "Start"} &rarr; {note.approx_end_date || "No deadline"}
@@ -726,7 +726,7 @@ function NotesContent() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded uppercase font-semibold border ${getPriorityBadge(
+                      className={`text-[10px] px-2 py-0.5 rounded uppercase font-semibold border ${getPriorityBadge(
                         selectedNote.priority
                       )}`}
                     >
@@ -755,7 +755,7 @@ function NotesContent() {
 
               {/* Countdown Banner */}
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 space-y-1">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400">
+                <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-medium">
                   Time Remaining Until Deadline
                 </span>
                 <CountdownTimer targetDate={selectedNote.approx_end_date} />
@@ -775,20 +775,20 @@ function NotesContent() {
               <div className="grid grid-cols-2 gap-3 text-xs p-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
                 <div className="space-y-0.5">
                   <span className="text-zinc-400 text-[11px]">Start Date</span>
-                  <p className="font-mono text-zinc-700 dark:text-zinc-300">
+                  <p className="font-medium text-zinc-700 dark:text-zinc-300">
                     {selectedNote.start_date || "Not specified"}
                   </p>
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-zinc-400 text-[11px]">Approx End Date</span>
-                  <p className="font-mono text-zinc-700 dark:text-zinc-300">
+                  <p className="font-medium text-zinc-700 dark:text-zinc-300">
                     {selectedNote.approx_end_date || "Not specified"}
                   </p>
                 </div>
                 {selectedNote.owner_email && (
                   <div className="col-span-2 pt-1 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
                     <span className="text-zinc-400 text-[11px]">Author</span>
-                    <p className="text-zinc-700 dark:text-zinc-300 font-mono">
+                    <p className="text-zinc-700 dark:text-zinc-300 font-medium">
                       {selectedNote.owner_username || selectedNote.owner_email.split('@')[0]} ({selectedNote.owner_email})
                     </p>
                   </div>
@@ -911,7 +911,7 @@ function NotesContent() {
                         key={p}
                         type="button"
                         onClick={() => setFormData({ ...formData, priority: p })}
-                        className={`py-1.5 rounded-lg capitalize font-mono text-[11px] border transition-all cursor-pointer ${
+                        className={`py-1.5 rounded-lg capitalize text-[11px] font-semibold border transition-all cursor-pointer ${
                           formData.priority === p
                             ? p === "urgent"
                               ? "bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-400 font-bold"

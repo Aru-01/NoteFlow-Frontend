@@ -16,7 +16,9 @@ import {
   Trash2,
   AlertTriangle,
   AlertCircle,
-  X
+  X,
+  Eye,
+  ExternalLink
 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
@@ -24,6 +26,7 @@ import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { ENDPOINTS } from "@/lib/constants";
 import { TableRowSkeleton } from "@/components/ui/LoadingSkeleton";
+import { formatDate } from "@/lib/utils";
 
 export default function AdminUsersPage() {
   const { user } = useAuth();
@@ -122,7 +125,7 @@ export default function AdminUsersPage() {
           <Lock className="w-6 h-6" />
         </div>
         <div className="space-y-2">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold">
+          <span className="text-[11px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold">
             RBAC Permission Guard
           </span>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
@@ -155,7 +158,7 @@ export default function AdminUsersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-zinc-200 dark:border-zinc-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-semibold">
+            <span className="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-semibold">
               Admin Portal
             </span>
             <span className="text-xs text-zinc-400">•</span>
@@ -204,32 +207,32 @@ export default function AdminUsersPage() {
       {/* Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <GlassCard hoverEffect={false} className="p-4 space-y-1">
-          <span className="text-xs text-zinc-500">Total Users</span>
-          <p className="text-2xl font-bold font-mono text-zinc-900 dark:text-white">
+          <span className="text-xs text-zinc-500 font-medium">Total Users</span>
+          <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
             {usersList.length}
           </p>
           <span className="text-[10px] text-zinc-400">Database rows</span>
         </GlassCard>
 
         <GlassCard hoverEffect={false} className="p-4 space-y-1">
-          <span className="text-xs text-zinc-500">Admins</span>
-          <p className="text-2xl font-bold font-mono text-blue-600 dark:text-blue-400">
+          <span className="text-xs text-zinc-500 font-medium">Admins</span>
+          <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400">
             {usersList.filter((u) => u.role === "admin").length}
           </p>
           <span className="text-[10px] text-zinc-400">Role: Admin</span>
         </GlassCard>
 
         <GlassCard hoverEffect={false} className="p-4 space-y-1">
-          <span className="text-xs text-zinc-500">OTP Verified</span>
-          <p className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs text-zinc-500 font-medium">OTP Verified</span>
+          <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">
             {usersList.filter((u) => u.is_verified).length}
           </p>
           <span className="text-[10px] text-zinc-400">Email confirmed</span>
         </GlassCard>
 
         <GlassCard hoverEffect={false} className="p-4 space-y-1">
-          <span className="text-xs text-zinc-500">Pending OTP</span>
-          <p className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">
+          <span className="text-xs text-zinc-500 font-medium">Pending OTP</span>
+          <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-600 dark:text-amber-400">
             {usersList.filter((u) => !u.is_verified).length}
           </p>
           <span className="text-[10px] text-zinc-400">Unverified</span>
@@ -326,24 +329,29 @@ export default function AdminUsersPage() {
                     className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30 transition-colors"
                   >
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-semibold flex items-center justify-center text-xs">
+                      <Link
+                        href={`/admin/users/${u.id}`}
+                        className="flex items-center gap-2.5 group/user cursor-pointer"
+                        title="View user notes & posts"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-semibold flex items-center justify-center text-xs group-hover/user:bg-blue-100 dark:group-hover/user:bg-blue-900/60 transition-colors">
                           {(u.username || u.email || "U")[0].toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium text-zinc-900 dark:text-white">
-                            {u.username || "Anonymous"}
+                          <p className="font-medium text-zinc-900 dark:text-white group-hover/user:text-blue-600 dark:group-hover/user:text-blue-400 transition-colors flex items-center gap-1">
+                            <span>{u.username || "Anonymous"}</span>
+                            <ExternalLink className="w-3 h-3 opacity-0 group-hover/user:opacity-100 transition-opacity text-blue-500" />
                           </p>
-                          <p className="text-[11px] text-zinc-500 font-mono">
+                          <p className="text-[11px] text-zinc-500 font-medium">
                             {u.email}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     </td>
 
                     <td className="py-3 px-4">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide ${
                           u.role === "admin"
                             ? "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900"
                             : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
@@ -382,7 +390,7 @@ export default function AdminUsersPage() {
                           u.interests.map((interest) => (
                             <span
                               key={interest}
-                              className="px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] text-zinc-600 dark:text-zinc-400 font-mono"
+                              className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] text-zinc-600 dark:text-zinc-400 font-medium"
                             >
                               #{interest}
                             </span>
@@ -393,12 +401,22 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
 
-                    <td className="py-3 px-4 text-zinc-500 font-mono text-[11px]">
-                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : "N/A"}
+                    <td className="py-3 px-4 text-zinc-500 font-medium text-[11px]">
+                      {u.created_at ? formatDate(u.created_at) : "N/A"}
                     </td>
 
                     <td className="py-3 px-4 text-right">
                       <div className="inline-flex items-center gap-1.5 justify-end">
+                        {/* View Single User Activity Page */}
+                        <Link
+                          href={`/admin/users/${u.id}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 transition-colors"
+                          title="View user's notes and posts"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Activity</span>
+                        </Link>
+
                         {/* Toggle Role Button */}
                         <button
                           onClick={() => handleToggleRole(u.id, u.role)}
@@ -469,7 +487,7 @@ export default function AdminUsersPage() {
                 <p className="text-zinc-700 dark:text-zinc-300">
                   Are you sure you want to remove user:
                 </p>
-                <p className="font-mono font-semibold text-zinc-900 dark:text-white">
+                <p className="font-semibold text-zinc-900 dark:text-white">
                   {userToDelete.email} ({userToDelete.username || "no username"})
                 </p>
                 <p className="text-[11px] text-zinc-500 pt-1">

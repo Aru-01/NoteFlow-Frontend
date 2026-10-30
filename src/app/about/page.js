@@ -43,12 +43,12 @@ export default function AboutPage() {
       technicalDetail: "Enforces unique_together (post, user) constraint and atomically updates the aggregate react_count field.",
     },
     {
-      title: "4. Aggregation Pipelines",
-      badge: "Data Processing",
+      title: "4. Smart Topic Discovery & Relational Joins",
+      badge: "Discovery Hub",
       icon: PieChart,
       description:
-        "Custom query pipelines matching users by shared interest arrays (Scenario 1: Group Users by Interests) and multi-model relational joins retrieving all posts for specific authors (Scenario 2: $lookup JOIN).",
-      technicalDetail: "Optimized through Python defaultdict grouping and Django select_related single-query joins with composite index (author, -created_at).",
+        "High-performance query engine matching users by shared topic arrays into collaborative interest circles, paired with relational joins retrieving comprehensive author activity histories.",
+      technicalDetail: "Optimized through indexed grouping and Django select_related single-query joins with composite index (author, -created_at).",
     },
     {
       title: "5. Dual-Layer Auth & OTP Verification",
@@ -78,7 +78,7 @@ export default function AboutPage() {
       >
         {/* Header */}
         <div className="space-y-2 border-b border-zinc-200 dark:border-zinc-800 pb-8">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300">
             <span>Project Specification</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
@@ -102,7 +102,7 @@ export default function AboutPage() {
                     <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex items-center justify-center">
                       <Icon className="w-4 h-4" />
                     </div>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400">
+                    <span className="text-[11px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400">
                       {module.badge}
                     </span>
                   </div>
@@ -115,7 +115,7 @@ export default function AboutPage() {
                 </div>
 
                 <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
-                  <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 block">
+                  <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 block">
                     <strong className="text-zinc-700 dark:text-zinc-300">Optimization:</strong> {module.technicalDetail}
                   </span>
                 </div>

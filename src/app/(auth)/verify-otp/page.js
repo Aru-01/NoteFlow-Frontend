@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
-import { ShieldCheck, ArrowRight, RotateCw, KeyRound, AlertCircle, CheckCircle2, Mail } from "lucide-react";
+import { ShieldCheck, ArrowRight, RotateCw, KeyRound, AlertCircle, CheckCircle2, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 function VerifyOtpContent() {
@@ -179,19 +179,36 @@ function VerifyOtpContent() {
 
           <form className="space-y-5" onSubmit={handleVerify}>
             <div>
-              <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                Registered Email
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                  Registered Email
+                </label>
+                <Link
+                  href="/register"
+                  className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Change email
+                </Link>
+              </div>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-2.5 w-4 h-4 text-zinc-400 dark:text-zinc-500" />
                 <input
                   type="email"
                   required
+                  readOnly={Boolean(email)}
+                  disabled={Boolean(email)}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-white"
+                  className={`w-full pl-10 pr-10 py-2 text-xs sm:text-sm rounded-xl border ${
+                    email
+                      ? "border-zinc-200 dark:border-zinc-700 bg-zinc-100/90 dark:bg-zinc-800/70 text-zinc-700 dark:text-zinc-300 font-medium cursor-not-allowed select-none"
+                      : "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-white"
+                  }`}
                 />
+                {email && (
+                  <Lock className="absolute right-3.5 top-2.5 w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                )}
               </div>
             </div>
 

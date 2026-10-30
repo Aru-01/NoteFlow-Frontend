@@ -2,7 +2,7 @@
  * API Endpoints mapping to NoteFlow Django REST Backend
  */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://note-flow-backend-eta.vercel.app";
 
 export const ENDPOINTS = {
   // Authentication & Accounts

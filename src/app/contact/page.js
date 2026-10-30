@@ -19,7 +19,7 @@ export default function ContactPage() {
         className="space-y-8"
       >
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300">
             <Mail className="w-3.5 h-3.5" />
             <span>Developer Support</span>
           </div>

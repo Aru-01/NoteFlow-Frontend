@@ -64,25 +64,25 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 shadow-2xs"
+          ? "bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-zinc-200/80 dark:border-zinc-800/80 shadow-xs"
           : "bg-transparent border-b border-transparent"
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-15">
+        <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-xs">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 text-white flex items-center justify-center font-bold text-xs shadow-[0_2px_12px_rgba(37,99,235,0.35)] group-hover:scale-105 transition-all">
               NF
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+              <span className="text-base lg:text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 NoteFlow
               </span>
               {isAdmin && (
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-semibold">
+                <span className="text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-semibold shadow-2xs">
                   Admin
                 </span>
               )}
@@ -90,11 +90,11 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav Items */}
-          <nav className="hidden md:flex items-center gap-0.5">
+          <nav className="hidden md:flex items-center gap-0.5 lg:gap-1 xl:gap-2 shrink-0">
             {/* 1. Home */}
             <Link
               href="/"
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`whitespace-nowrap px-2.5 lg:px-3 xl:px-3.5 py-1.5 text-xs lg:text-[13.5px] xl:text-sm font-medium rounded-lg transition-colors ${
                 pathname === "/"
                   ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
@@ -107,21 +107,21 @@ export default function Navbar() {
             {isAdmin ? (
               <div 
                 ref={dropdownRef} 
-                className="relative"
+                className="relative shrink-0"
                 onMouseEnter={() => setNotesDropdown(true)}
                 onMouseLeave={() => setNotesDropdown(false)}
               >
                 <button
                   onClick={() => setNotesDropdown(!notesDropdown)}
-                  className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                  className={`whitespace-nowrap flex items-center gap-1 px-2.5 lg:px-3 xl:px-3.5 py-1.5 text-xs lg:text-[13.5px] xl:text-sm font-medium rounded-lg transition-colors cursor-pointer ${
                     pathname.startsWith("/notes")
                       ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
                   }`}
                 >
-                  <FileText className="w-3.5 h-3.5" />
+                  <FileText className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-blue-500" />
                   <span>Notes</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform ${notesDropdown ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${notesDropdown ? "rotate-180" : ""}`} />
                 </button>
 
                 {/* Admin Notes Sub-menu Dropdown */}
@@ -132,19 +132,19 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 4, scale: 0.98 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-0 mt-1 w-52 p-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121215] shadow-xl z-50 space-y-0.5"
+                      className="absolute left-0 mt-1 w-56 p-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121215] shadow-xl z-50 space-y-0.5"
                     >
-                      <div className="px-2.5 py-1 text-[10px] font-mono uppercase text-zinc-400">
+                      <div className="px-2.5 py-1 text-[11px] uppercase tracking-wider text-zinc-400 font-semibold">
                         Admin Notes Hub
                       </div>
 
                       <Link
                         href="/notes?view=my"
-                        className="flex items-start gap-2 p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
+                        className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
                       >
                         <FileText className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-semibold text-zinc-900 dark:text-white">
+                          <p className="text-sm font-semibold text-zinc-900 dark:text-white">
                             My Notes
                           </p>
                           <p className="text-[11px] text-zinc-500">
@@ -155,11 +155,11 @@ export default function Navbar() {
 
                       <Link
                         href="/notes?view=all"
-                        className="flex items-start gap-2 p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
+                        className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
                       >
                         <Users className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-semibold text-zinc-900 dark:text-white">
+                          <p className="text-sm font-semibold text-zinc-900 dark:text-white">
                             Users&apos; Notes
                           </p>
                           <p className="text-[11px] text-zinc-500">
@@ -174,7 +174,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/notes"
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                className={`whitespace-nowrap flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-3.5 py-1.5 text-xs lg:text-[13.5px] xl:text-sm font-medium rounded-lg transition-colors ${
                   pathname === "/notes"
                     ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
                     : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
@@ -187,7 +187,7 @@ export default function Navbar() {
             {/* 3. Community Feed */}
             <Link
               href="/posts"
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`whitespace-nowrap px-2.5 lg:px-3 xl:px-3.5 py-1.5 text-xs lg:text-[13.5px] xl:text-sm font-medium rounded-lg transition-colors ${
                 pathname === "/posts"
                   ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
@@ -200,13 +200,13 @@ export default function Navbar() {
             {isAdmin && (
               <Link
                 href="/admin/users"
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                className={`whitespace-nowrap flex items-center gap-1.5 px-2.5 lg:px-3 xl:px-3.5 py-1.5 text-xs lg:text-[13.5px] xl:text-sm font-medium rounded-lg transition-colors ${
                   pathname === "/admin/users"
                     ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-semibold"
                     : "text-blue-600/90 dark:text-blue-400/90 hover:bg-blue-50/50 dark:hover:bg-blue-950/30"
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                <ShieldCheck className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-blue-500" />
                 <span>User Manage</span>
               </Link>
             )}
@@ -214,7 +214,7 @@ export default function Navbar() {
             {/* 5. About Us */}
             <Link
               href="/about"
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`whitespace-nowrap px-2.5 lg:px-3 xl:px-3.5 py-1.5 text-xs lg:text-[13.5px] xl:text-sm font-medium rounded-lg transition-colors ${
                 pathname === "/about"
                   ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
@@ -226,7 +226,7 @@ export default function Navbar() {
             {/* 6. Contact Us */}
             <Link
               href="/contact"
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`whitespace-nowrap px-2.5 lg:px-3 xl:px-3.5 py-1.5 text-xs lg:text-[13.5px] xl:text-sm font-medium rounded-lg transition-colors ${
                 pathname === "/contact"
                   ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 font-semibold"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
@@ -237,7 +237,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right Section: Theme Toggle & Real Auth Buttons */}
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2 lg:gap-2.5 shrink-0">
             {/* Light / Dark Mode Toggle */}
             <button
               onClick={toggleTheme}
@@ -253,20 +253,20 @@ export default function Navbar() {
 
             {/* Authenticated vs Guest View */}
             {isAuthenticated ? (
-              <div className="flex items-center gap-2 pl-1">
+              <div className="flex items-center gap-1.5 lg:gap-2 pl-1 shrink-0">
                 <Link
                   href="/profile"
                   title="Manage Your Profile"
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 hover:bg-zinc-200/70 dark:bg-zinc-800 dark:hover:bg-zinc-700/70 border border-zinc-200/80 dark:border-zinc-700/60 text-xs text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer group"
+                  className="whitespace-nowrap flex items-center gap-2 px-2.5 lg:px-3.5 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200/80 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-zinc-200/90 dark:border-zinc-700/70 text-xs lg:text-sm text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer group shadow-2xs shrink-0"
                 >
-                  <div className="w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-[10px] group-hover:scale-105 transition-transform">
+                  <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform shrink-0">
                     {user?.username ? user.username[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : "U"}
                   </div>
-                  <span className="font-medium max-w-[120px] truncate group-hover:text-zinc-900 dark:group-hover:text-white">
+                  <span className="font-semibold text-xs lg:text-sm max-w-[100px] lg:max-w-[140px] truncate group-hover:text-zinc-900 dark:group-hover:text-white">
                     {user?.username || user?.email?.split("@")[0]}
                   </span>
                   {isAdmin && (
-                    <span className="text-[10px] font-mono px-1 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                    <span className="text-[10px] tracking-wider uppercase px-1.5 py-0.2 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-semibold shrink-0">
                       admin
                     </span>
                   )}
@@ -275,22 +275,22 @@ export default function Navbar() {
                 <button
                   onClick={logout}
                   title="Sign Out"
-                  className="p-1.5 rounded-md text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                  className="p-2 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer shrink-0"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
+              <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
+                <Link href="/login" className="shrink-0">
+                  <Button variant="ghost" size="sm" className="whitespace-nowrap text-xs lg:text-[13px] xl:text-sm px-2.5 lg:px-3.5 py-1.5">
                     Sign In
                   </Button>
                 </Link>
 
-                <Link href="/register">
-                  <Button variant="primary" size="sm" icon={ArrowRight}>
-                    Get Started
+                <Link href="/register" className="shrink-0">
+                  <Button variant="primary" size="sm" icon={ArrowRight} className="whitespace-nowrap text-xs lg:text-[13px] xl:text-sm px-3 lg:px-4 py-1.5">
+                    Get Started Free
                   </Button>
                 </Link>
               </div>
@@ -349,7 +349,7 @@ export default function Navbar() {
                       <FileText className="w-4 h-4 text-blue-500" />
                       <span>Notes</span>
                     </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                    <span className="text-[10px] tracking-wider uppercase px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-semibold">
                       Admin Sub-nav
                     </span>
                   </div>

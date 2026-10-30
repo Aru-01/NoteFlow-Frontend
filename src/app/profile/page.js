@@ -114,7 +114,7 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="pb-6 border-b border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-semibold">
+          <span className="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-semibold">
             Account Settings
           </span>
           <span className="text-xs text-zinc-400">•</span>
@@ -155,14 +155,14 @@ export default function ProfilePage() {
               <h2 className="text-base font-bold text-zinc-900 dark:text-white">
                 {username || "User"}
               </h2>
-              <p className="text-xs text-zinc-500 font-mono">
+              <p className="text-xs text-zinc-500 font-medium">
                 {user?.email}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
               Role: {(user?.role || "USER").toUpperCase()}
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
@@ -214,7 +214,7 @@ export default function ProfilePage() {
           {/* Interests Manager */}
           <div>
             <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              Interests & Topics (Used in Scenario 1 Group Aggregations)
+              Interests & Topics (Community Matching)
             </label>
 
             {/* Existing tags list */}
@@ -227,7 +227,7 @@ export default function ProfilePage() {
                 interests.map((interest) => (
                   <span
                     key={interest}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-mono border border-zinc-200 dark:border-zinc-700 shadow-2xs"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-medium border border-zinc-200 dark:border-zinc-700 shadow-2xs"
                   >
                     <span>#{interest}</span>
                     <button

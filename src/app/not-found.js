@@ -15,14 +15,14 @@ export default function NotFound() {
         className="max-w-md w-full text-center space-y-6"
       >
         {/* Status Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/60">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/60">
           <AlertCircle className="w-3.5 h-3.5 text-zinc-500" />
           <span>Error 404 • Missing Resource</span>
         </div>
 
         {/* Big Numeric & Headline */}
         <div className="space-y-2">
-          <h1 className="text-6xl sm:text-7xl font-extrabold tracking-tight font-mono text-zinc-900 dark:text-white">
+          <h1 className="text-6xl sm:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-white">
             404
           </h1>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
@@ -51,7 +51,7 @@ export default function NotFound() {
 
         {/* Helpful Direct Links */}
         <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
-          <span className="text-[11px] font-mono uppercase text-zinc-400">
+          <span className="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">
             Or explore active workspaces:
           </span>
           <div className="flex justify-center gap-4 text-xs">

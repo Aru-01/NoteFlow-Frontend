@@ -26,7 +26,7 @@ export default function Loading() {
         <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 dark:bg-zinc-400 animate-pulse [animation-delay:400ms]" />
       </div>
 
-      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-mono tracking-tight">
+      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 tracking-normal">
         Loading NoteFlow workspace...
       </p>
     </div>

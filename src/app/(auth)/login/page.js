@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
-import { ArrowRight, ShieldCheck, Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ShieldCheck, Mail, Lock, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 function LoginContent() {
@@ -16,6 +16,7 @@ function LoginContent() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
@@ -23,6 +24,8 @@ function LoginContent() {
   useEffect(() => {
     if (searchParams.get("verified") === "true") {
       setInfoMsg("Your email has been verified successfully. You can now log in.");
+    } else if (searchParams.get("reset") === "true") {
+      setInfoMsg("Your password has been reset successfully. You can now log in with your new password.");
     } else if (searchParams.get("session_expired") === "true") {
       setError("Your session has expired. Please sign in again.");
     }
@@ -131,7 +134,7 @@ function LoginContent() {
                   Password
                 </label>
                 <Link
-                  href="/contact"
+                  href={email ? `/forgot-password?email=${encodeURIComponent(email.trim())}` : "/forgot-password"}
                   className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   Forgot?
@@ -140,13 +143,22 @@ function LoginContent() {
               <div className="relative">
                 <Lock className="absolute left-3.5 top-2.5 w-4 h-4 text-zinc-400 dark:text-zinc-500" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-white"
+                  className="w-full pl-10 pr-10 py-2 text-xs sm:text-sm rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-white"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
