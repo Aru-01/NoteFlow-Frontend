@@ -1,0 +1,47 @@
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import SmoothScroll from "@/components/providers/SmoothScroll";
+import AmbientBackground from "@/components/ui/AmbientBackground";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { ThemeProvider } from "@/context/ThemeContext";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata = {
+  title: "NoteFlow | Thoughtful Note-Taking & Community Feed",
+  description:
+    "A clean, human-centered workspace for organized notes, authentic sharing, and secure OTP verification.",
+  icons: {
+    icon: "/icon.svg",
+  },
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen flex flex-col bg-[#fbfbfa] dark:bg-[#0d0f14] text-stone-900 dark:text-zinc-100 transition-colors duration-200 selection:bg-indigo-500/20 selection:text-indigo-700 dark:selection:text-indigo-300">
+        <ThemeProvider>
+          <SmoothScroll>
+            <AmbientBackground />
+            <Navbar />
+            <main className="flex-1 pt-16 flex flex-col">{children}</main>
+            <Footer />
+          </SmoothScroll>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
