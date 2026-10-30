@@ -13,6 +13,7 @@ const AuthContext = createContext({
   register: async () => {},
   logout: () => {},
   refreshUserProfile: async () => {},
+  setMockRole: () => {},
 });
 
 export function AuthProvider({ children }) {
@@ -55,6 +56,28 @@ export function AuthProvider({ children }) {
     }
   };
 
+  /**
+   * Helper to toggle preview role during frontend design / testing
+   * without needing the backend running.
+   */
+  const setMockRole = (role) => {
+    if (!role) {
+      logout();
+      return;
+    }
+    const mockUser = {
+      id: role === "admin" ? 1 : 42,
+      email: role === "admin" ? "admin@noteflow.dev" : "user@noteflow.dev",
+      username: role === "admin" ? "arif_admin" : "arif_user",
+      role: role,
+      is_verified: true,
+      interests: ["coding", "architecture", "security"],
+    };
+    tokenStorage.setUser(mockUser);
+    tokenStorage.setTokens("mock_access_token", "mock_refresh_token");
+    setUser(mockUser);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -64,6 +87,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         refreshUserProfile,
+        setMockRole,
       }}
     >
       {children}
@@ -78,4 +102,3 @@ export function useAuth() {
   }
   return context;
 }
-

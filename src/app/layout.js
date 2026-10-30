@@ -5,6 +5,7 @@ import AmbientBackground from "@/components/ui/AmbientBackground";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,14 +33,16 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen flex flex-col bg-[#fbfbfa] dark:bg-[#0d0f14] text-stone-900 dark:text-zinc-100 transition-colors duration-200 selection:bg-indigo-500/20 selection:text-indigo-700 dark:selection:text-indigo-300">
+      <body className="min-h-screen flex flex-col bg-white dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 transition-colors duration-200 selection:bg-blue-500/20 selection:text-blue-700 dark:selection:text-blue-300">
         <ThemeProvider>
-          <SmoothScroll>
-            <AmbientBackground />
-            <Navbar />
-            <main className="flex-1 pt-16 flex flex-col">{children}</main>
-            <Footer />
-          </SmoothScroll>
+          <AuthProvider>
+            <SmoothScroll>
+              <AmbientBackground />
+              <Navbar />
+              <main className="flex-1 pt-15 flex flex-col">{children}</main>
+              <Footer />
+            </SmoothScroll>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
