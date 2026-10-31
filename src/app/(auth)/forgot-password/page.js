@@ -28,7 +28,7 @@ function ForgotPasswordContent() {
 
   // Step 1: Request OTP, Step 2: Verify OTP and Set New Password
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => searchParams.get("email")?.trim() || "");
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,11 +41,6 @@ function ForgotPasswordContent() {
   const [message, setMessage] = useState("");
 
   const inputRefs = useRef([]);
-
-  useEffect(() => {
-    const qEmail = searchParams.get("email");
-    if (qEmail) setEmail(qEmail.trim());
-  }, [searchParams]);
 
   // Step 1: Request Password Reset OTP
   const handleRequestOtp = async (e) => {

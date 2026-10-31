@@ -55,10 +55,12 @@ export default function Navbar() {
   }, []);
 
   // Close dropdown when route changes
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setNotesDropdown(false);
     setIsOpen(false);
-  }, [pathname]);
+  }
 
   const isAdmin = user?.role === "admin";
 

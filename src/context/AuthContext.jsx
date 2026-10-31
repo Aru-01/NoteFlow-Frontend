@@ -29,7 +29,9 @@ export function AuthProvider({ children }) {
     const token = tokenStorage.getAccessToken();
 
     if (token && storedUser) {
-      setUser(storedUser);
+      queueMicrotask(() => {
+        setUser(storedUser);
+      });
       // Silently sync latest profile in background
       api
         .get(ENDPOINTS.AUTH.PROFILE)
@@ -44,7 +46,9 @@ export function AuthProvider({ children }) {
           setIsLoading(false);
         });
     } else {
-      setIsLoading(false);
+      queueMicrotask(() => {
+        setIsLoading(false);
+      });
     }
   }, []);
 

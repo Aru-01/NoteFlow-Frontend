@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
@@ -27,20 +27,24 @@ import { ENDPOINTS } from "@/lib/constants";
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading, updateProfile } = useAuth();
 
-  const [username, setUsername] = useState("");
-  const [interests, setInterests] = useState([]);
+  const [username, setUsername] = useState(() => user?.username || "");
+  const [interests, setInterests] = useState(() =>
+    Array.isArray(user?.interests) ? user.interests : [],
+  );
   const [interestInput, setInterestInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Populate user data
-  useEffect(() => {
+  // Sync state if user loads after mount
+  const [prevUser, setPrevUser] = useState(user);
+  if (user !== prevUser) {
+    setPrevUser(user);
     if (user) {
       setUsername(user.username || "");
       setInterests(Array.isArray(user.interests) ? user.interests : []);
     }
-  }, [user]);
+  }
 
   // Add an interest tag
   const handleAddInterest = (e) => {

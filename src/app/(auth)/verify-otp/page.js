@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,7 +14,14 @@ function VerifyOtpContent() {
   const searchParams = useSearchParams();
   const { verifyOtp, resendOtp } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    const paramEmail = searchParams.get("email");
+    const storedEmail =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("noteflow_verify_email")
+        : "";
+    return paramEmail || storedEmail || "";
+  });
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -22,14 +29,6 @@ function VerifyOtpContent() {
   const [message, setMessage] = useState("");
 
   const inputRefs = useRef([]);
-
-  useEffect(() => {
-    // Populate email from query param or session storage
-    const paramEmail = searchParams.get("email");
-    const storedEmail = typeof window !== "undefined" ? sessionStorage.getItem("noteflow_verify_email") : "";
-    const targetEmail = paramEmail || storedEmail || "";
-    setEmail(targetEmail);
-  }, [searchParams]);
 
   const handleDigitChange = (index, value) => {
     // Keep only the last character entered if numeric

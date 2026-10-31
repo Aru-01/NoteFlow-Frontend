@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Clock, 
-  Lock, 
-  Trash2, 
-  Edit3, 
-  RefreshCw, 
-  AlertCircle, 
-  CheckCircle2, 
+import {
+  FileText,
+  Plus,
+  Search,
+  Clock,
+  Lock,
+  Trash2,
+  Edit3,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
   Calendar,
   X,
   AlertTriangle,
@@ -24,7 +24,7 @@ import {
   Users,
   Eye,
   Check,
-  Tag
+  Tag,
 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
@@ -41,16 +41,8 @@ function NotesContent() {
   const isAdmin = user?.role === "admin";
 
   // Admin View Scope: "my" (personal notes) or "all" (all users' notes across the system)
-  const initialView = searchParams.get("view") || (isAdmin ? "my" : "my");
-  const [adminView, setAdminView] = useState(initialView);
-
-  // Sync state if query param changes
-  useEffect(() => {
-    const viewParam = searchParams.get("view");
-    if (viewParam === "my" || viewParam === "all") {
-      setAdminView(viewParam);
-    }
-  }, [searchParams]);
+  const viewParam = searchParams.get("view");
+  const adminView = isAdmin && viewParam === "all" ? "all" : "my";
 
   // Data & Loading states
   const [notes, setNotes] = useState([]);
@@ -89,12 +81,9 @@ function NotesContent() {
   };
   const [formData, setFormData] = useState(initialFormState);
 
-  // Fetch notes from real Django backend
-  const fetchNotes = useCallback(async (page = 1) => {
-    if (!isAuthenticated) {
-      setIsLoading(false);
-      return;
-    }
+  // Manual & Paginated fetch
+  const fetchNotes = async (page = 1) => {
+    if (!isAuthenticated) return;
 
     setIsLoading(true);
     setError("");
@@ -105,7 +94,6 @@ function NotesContent() {
       if (filterPriority !== "all") params.priority = filterPriority;
       if (filterStatus !== "all") params.status = filterStatus;
 
-      // When in "My Notes", query ONLY notes authored by this user
       if (isAdmin) {
         if (adminView === "my" && user?.id) {
           params.user_id = user.id;
@@ -115,11 +103,12 @@ function NotesContent() {
       }
 
       const res = await api.get(ENDPOINTS.NOTES.LIST_CREATE, { params });
-      const results = res.data?.results !== undefined 
-        ? res.data.results 
-        : Array.isArray(res.data) 
-        ? res.data 
-        : [];
+      const results =
+        res.data?.results !== undefined
+          ? res.data.results
+          : Array.isArray(res.data)
+            ? res.data
+            : [];
 
       setNotes(results);
       setPagination({
@@ -137,20 +126,83 @@ function NotesContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, searchQuery, filterPriority, filterStatus, adminUserFilter, isAdmin, adminView, user?.id]);
+  };
 
   // Initial and reactive fetch
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      fetchNotes(1);
-    } else if (!authLoading && !isAuthenticated) {
-      setIsLoading(false);
+    let ignore = false;
+
+    if (authLoading || !isAuthenticated) {
+      return;
     }
-  }, [authLoading, isAuthenticated, fetchNotes]);
+
+    const loadNotes = async () => {
+      try {
+        const params = { page: 1 };
+        if (searchQuery.trim()) params.search = searchQuery.trim();
+        if (filterPriority !== "all") params.priority = filterPriority;
+        if (filterStatus !== "all") params.status = filterStatus;
+
+        if (isAdmin) {
+          if (adminView === "my" && user?.id) {
+            params.user_id = user.id;
+          } else if (adminView === "all" && adminUserFilter.trim()) {
+            params.user_id = adminUserFilter.trim();
+          }
+        }
+
+        const res = await api.get(ENDPOINTS.NOTES.LIST_CREATE, { params });
+        if (ignore) return;
+
+        const results =
+          res.data?.results !== undefined
+            ? res.data.results
+            : Array.isArray(res.data)
+              ? res.data
+              : [];
+
+        setNotes(results);
+        setPagination({
+          count: res.data?.count || results.length,
+          next: res.data?.next || null,
+          previous: res.data?.previous || null,
+          current: 1,
+        });
+        setError("");
+      } catch (err) {
+        if (!ignore) {
+          if (err.response?.status === 401) {
+            setError("Your session has expired. Please sign in again.");
+          } else {
+            setError("Failed to load notes. Please verify backend connection.");
+          }
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadNotes();
+
+    return () => {
+      ignore = true;
+    };
+  }, [
+    authLoading,
+    isAuthenticated,
+    searchQuery,
+    filterPriority,
+    filterStatus,
+    adminUserFilter,
+    isAdmin,
+    adminView,
+    user,
+  ]);
 
   // Switch Admin Scope View
   const handleAdminViewChange = (newView) => {
-    setAdminView(newView);
     router.replace(`/notes?view=${newView}`, { scroll: false });
   };
 
@@ -224,9 +276,12 @@ function NotesContent() {
         setNotes((prev) => [res.data, ...prev]);
         setSuccessMsg("Note created successfully!");
       } else if (modalMode === "edit" && selectedNote) {
-        const res = await api.patch(ENDPOINTS.NOTES.DETAIL(selectedNote.id), payload);
+        const res = await api.patch(
+          ENDPOINTS.NOTES.DETAIL(selectedNote.id),
+          payload,
+        );
         setNotes((prev) =>
-          prev.map((n) => (n.id === selectedNote.id ? res.data : n))
+          prev.map((n) => (n.id === selectedNote.id ? res.data : n)),
         );
         if (selectedNote?.id === res.data.id) {
           setSelectedNote(res.data);
@@ -242,7 +297,7 @@ function NotesContent() {
         setFormError(
           Array.isArray(resp.approx_end_date)
             ? resp.approx_end_date[0]
-            : resp.approx_end_date
+            : resp.approx_end_date,
         );
       } else if (resp?.title) {
         setFormError(Array.isArray(resp.title) ? resp.title[0] : resp.title);
@@ -259,7 +314,7 @@ function NotesContent() {
   // Quick inline status update
   const handleQuickStatusChange = async (noteId, newStatus) => {
     setNotes((prev) =>
-      prev.map((n) => (n.id === noteId ? { ...n, status: newStatus } : n))
+      prev.map((n) => (n.id === noteId ? { ...n, status: newStatus } : n)),
     );
     if (selectedNote?.id === noteId) {
       setSelectedNote({ ...selectedNote, status: newStatus });
@@ -334,8 +389,8 @@ function NotesContent() {
             Access Your Notes Workspace
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-            NoteFlow keeps your notes private and encrypted per user account. Please sign in or register
-            to create and manage your notes.
+            NoteFlow keeps your notes private and encrypted per user account.
+            Please sign in or register to create and manage your notes.
           </p>
         </div>
 
@@ -363,18 +418,18 @@ function NotesContent() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-zinc-200 dark:border-zinc-800">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            {isAdmin 
+            {isAdmin
               ? adminView === "my"
                 ? "My Notes"
                 : "Users' Notes"
               : "My Notes"}
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5">
-            {isAdmin 
+            {isAdmin
               ? adminView === "my"
                 ? "Your personal tasks, priorities, and deadlines."
                 : "Workspace overview: viewing notes across all users in the system."
-              : "Organize your workflow, track deadlines with live countdowns, and manage priorities."}
+              : "Plan your day, set clear priorities, and keep every deadline in sight with live countdowns."}
           </p>
         </div>
 
@@ -417,7 +472,12 @@ function NotesContent() {
           >
             Refresh
           </Button>
-          <Button variant="primary" size="sm" icon={Plus} onClick={handleOpenCreate}>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={Plus}
+            onClick={handleOpenCreate}
+          >
             New Note
           </Button>
         </div>
@@ -478,7 +538,9 @@ function NotesContent() {
             ))}
           </div>
 
-          <span className="text-zinc-300 dark:text-zinc-700 hidden sm:inline">•</span>
+          <span className="text-zinc-300 dark:text-zinc-700 hidden sm:inline">
+            •
+          </span>
 
           {/* Priority Tabs */}
           <div className="flex items-center gap-1">
@@ -501,7 +563,9 @@ function NotesContent() {
           {/* Admin-only User ID Filter (STRICTLY only shown in 'Users Notes' view, never in 'My Notes') */}
           {isAdmin && adminView === "all" && (
             <>
-              <span className="text-zinc-300 dark:text-zinc-700 hidden sm:inline">•</span>
+              <span className="text-zinc-300 dark:text-zinc-700 hidden sm:inline">
+                •
+              </span>
               <div className="flex items-center gap-1">
                 <span className="text-zinc-400 text-[11px]">User ID:</span>
                 <input
@@ -542,21 +606,30 @@ function NotesContent() {
           </div>
           <div className="space-y-1">
             <h3 className="text-base font-semibold text-zinc-900 dark:text-white">
-              {searchQuery || filterPriority !== "all" || filterStatus !== "all" || adminUserFilter
+              {searchQuery ||
+              filterPriority !== "all" ||
+              filterStatus !== "all" ||
+              adminUserFilter
                 ? "No notes match your active filters"
                 : isViewingMyNotes
-                ? "You haven't created any notes yet"
-                : "No notes found in the system"}
+                  ? "You haven't created any notes yet"
+                  : "No notes found in the system"}
             </h3>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              {searchQuery || filterPriority !== "all" || filterStatus !== "all" || adminUserFilter
+              {searchQuery ||
+              filterPriority !== "all" ||
+              filterStatus !== "all" ||
+              adminUserFilter
                 ? "Try adjusting your search keywords or clear the active filters."
                 : "Create your first task to start organizing deadlines with live countdown timers."}
             </p>
           </div>
 
           <div className="pt-2">
-            {searchQuery || filterPriority !== "all" || filterStatus !== "all" || adminUserFilter ? (
+            {searchQuery ||
+            filterPriority !== "all" ||
+            filterStatus !== "all" ||
+            adminUserFilter ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -570,7 +643,12 @@ function NotesContent() {
                 Clear Filters
               </Button>
             ) : (
-              <Button variant="primary" size="sm" icon={Plus} onClick={handleOpenCreate}>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={Plus}
+                onClick={handleOpenCreate}
+              >
                 Create Your First Note
               </Button>
             )}
@@ -586,10 +664,13 @@ function NotesContent() {
             >
               <div className="space-y-2.5">
                 {/* Priority & Status Badges */}
-                <div className="flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="flex items-center justify-between gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded uppercase font-semibold border ${getPriorityBadge(
-                      note.priority
+                      note.priority,
                     )}`}
                   >
                     {note.priority}
@@ -598,9 +679,11 @@ function NotesContent() {
                   {/* Inline quick status selector */}
                   <select
                     value={note.status}
-                    onChange={(e) => handleQuickStatusChange(note.id, e.target.value)}
+                    onChange={(e) =>
+                      handleQuickStatusChange(note.id, e.target.value)
+                    }
                     className={`text-[11px] font-medium px-2 py-0.5 rounded-full border cursor-pointer focus:outline-none ${getStatusBadge(
-                      note.status
+                      note.status,
                     )}`}
                   >
                     <option value="pending">Pending</option>
@@ -617,7 +700,11 @@ function NotesContent() {
 
                 {/* Description */}
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                  {note.description || <span className="italic text-zinc-400">No description provided.</span>}
+                  {note.description || (
+                    <span className="italic text-zinc-400">
+                      No description provided.
+                    </span>
+                  )}
                 </p>
 
                 {/* Real-Time Countdown Timer */}
@@ -627,13 +714,17 @@ function NotesContent() {
               </div>
 
               {/* Note Metadata & Action Buttons */}
-              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-2 text-xs"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* Dates Information */}
                 {(note.start_date || note.approx_end_date) && (
                   <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-medium">
                     <Calendar className="w-3 h-3 text-zinc-400" />
                     <span>
-                      {note.start_date || "Start"} &rarr; {note.approx_end_date || "No deadline"}
+                      {note.start_date || "Start"} &rarr;{" "}
+                      {note.approx_end_date || "No deadline"}
                     </span>
                   </div>
                 )}
@@ -643,7 +734,10 @@ function NotesContent() {
                   <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 pt-0.5">
                     <UserIcon className="w-3 h-3 text-zinc-400 shrink-0" />
                     <span className="truncate">
-                      Author: <strong className="text-zinc-700 dark:text-zinc-300">{note.owner_username || note.owner_email.split('@')[0]}</strong>
+                      Author:{" "}
+                      <strong className="text-zinc-700 dark:text-zinc-300">
+                        {note.owner_username || note.owner_email.split("@")[0]}
+                      </strong>
                     </span>
                   </div>
                 )}
@@ -685,7 +779,8 @@ function NotesContent() {
       {pagination.count > 10 && (
         <div className="pt-4 flex items-center justify-between text-xs text-zinc-500">
           <span>
-            Page {pagination.current} of {Math.ceil(pagination.count / 10)} ({pagination.count} total)
+            Page {pagination.current} of {Math.ceil(pagination.count / 10)} (
+            {pagination.count} total)
           </span>
 
           <div className="flex gap-2">
@@ -727,14 +822,14 @@ function NotesContent() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded uppercase font-semibold border ${getPriorityBadge(
-                        selectedNote.priority
+                        selectedNote.priority,
                       )}`}
                     >
                       {selectedNote.priority}
                     </span>
                     <span
                       className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${getStatusBadge(
-                        selectedNote.status
+                        selectedNote.status,
                       )}`}
                     >
                       {selectedNote.status.replace("_", " ").toUpperCase()}
@@ -767,7 +862,11 @@ function NotesContent() {
                   Description & Context
                 </span>
                 <div className="p-4 rounded-xl bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200/60 dark:border-zinc-800 text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto">
-                  {selectedNote.description || <span className="italic text-zinc-400">No description provided.</span>}
+                  {selectedNote.description || (
+                    <span className="italic text-zinc-400">
+                      No description provided.
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -780,7 +879,9 @@ function NotesContent() {
                   </p>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-zinc-400 text-[11px]">Approx End Date</span>
+                  <span className="text-zinc-400 text-[11px]">
+                    Approx End Date
+                  </span>
                   <p className="font-medium text-zinc-700 dark:text-zinc-300">
                     {selectedNote.approx_end_date || "Not specified"}
                   </p>
@@ -789,7 +890,9 @@ function NotesContent() {
                   <div className="col-span-2 pt-1 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
                     <span className="text-zinc-400 text-[11px]">Author</span>
                     <p className="text-zinc-700 dark:text-zinc-300 font-medium">
-                      {selectedNote.owner_username || selectedNote.owner_email.split('@')[0]} ({selectedNote.owner_email})
+                      {selectedNote.owner_username ||
+                        selectedNote.owner_email.split("@")[0]}{" "}
+                      ({selectedNote.owner_email})
                     </p>
                   </div>
                 )}
@@ -801,7 +904,9 @@ function NotesContent() {
                   <span className="text-xs text-zinc-400">Change Status:</span>
                   <select
                     value={selectedNote.status}
-                    onChange={(e) => handleQuickStatusChange(selectedNote.id, e.target.value)}
+                    onChange={(e) =>
+                      handleQuickStatusChange(selectedNote.id, e.target.value)
+                    }
                     className="text-xs px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 cursor-pointer"
                   >
                     <option value="pending">Pending</option>
@@ -853,7 +958,9 @@ function NotesContent() {
             >
               <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
                 <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-                  {modalMode === "create" ? "Create New Note" : "Edit Note Details"}
+                  {modalMode === "create"
+                    ? "Create New Note"
+                    : "Edit Note Details"}
                 </h3>
                 <button
                   onClick={() => setModalMode(null)}
@@ -880,7 +987,9 @@ function NotesContent() {
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     placeholder="e.g. Design sprint planning"
                     className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-white"
                   />
@@ -894,7 +1003,9 @@ function NotesContent() {
                   <textarea
                     rows={4}
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     placeholder="Enter detailed action items or context..."
                     className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-white resize-none"
                   />
@@ -910,16 +1021,18 @@ function NotesContent() {
                       <button
                         key={p}
                         type="button"
-                        onClick={() => setFormData({ ...formData, priority: p })}
+                        onClick={() =>
+                          setFormData({ ...formData, priority: p })
+                        }
                         className={`py-1.5 rounded-lg capitalize text-[11px] font-semibold border transition-all cursor-pointer ${
                           formData.priority === p
                             ? p === "urgent"
                               ? "bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-400 font-bold"
                               : p === "high"
-                              ? "bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-400 font-bold"
-                              : p === "medium"
-                              ? "bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-400 font-bold"
-                              : "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-400 font-bold"
+                                ? "bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-400 font-bold"
+                                : p === "medium"
+                                  ? "bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-400 font-bold"
+                                  : "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-400 font-bold"
                             : "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
                         }`}
                       >
@@ -944,7 +1057,9 @@ function NotesContent() {
                       <button
                         key={st.id}
                         type="button"
-                        onClick={() => setFormData({ ...formData, status: st.id })}
+                        onClick={() =>
+                          setFormData({ ...formData, status: st.id })
+                        }
                         className={`py-1.5 rounded-lg text-[11px] border transition-all cursor-pointer ${
                           formData.status === st.id
                             ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold border-zinc-900 dark:border-white"
@@ -966,7 +1081,9 @@ function NotesContent() {
                     <input
                       type="date"
                       value={formData.start_date}
-                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, start_date: e.target.value })
+                      }
                       className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none"
                     />
                   </div>
@@ -979,7 +1096,10 @@ function NotesContent() {
                       type="date"
                       value={formData.approx_end_date}
                       onChange={(e) =>
-                        setFormData({ ...formData, approx_end_date: e.target.value })
+                        setFormData({
+                          ...formData,
+                          approx_end_date: e.target.value,
+                        })
                       }
                       className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none"
                     />
@@ -1082,7 +1202,13 @@ function NotesContent() {
 
 export default function NotesPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-xs text-zinc-500">Loading notes workspace...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-12 text-center text-xs text-zinc-500">
+          Loading notes workspace...
+        </div>
+      }
+    >
       <NotesContent />
     </Suspense>
   );

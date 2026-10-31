@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { Heart, ExternalLink } from "lucide-react";
@@ -20,8 +20,8 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-sm leading-relaxed">
-              Full-stack note management and community discussion platform.
-              Powered by Django REST Framework (RBAC + OTP) and Next.js 16.
+              A modern workspace for personal notes, deadline tracking, and
+              topic-driven community discussions.
             </p>
             <div className="pt-1">
               <a
@@ -44,28 +44,43 @@ export default function Footer() {
             </h4>
             <ul className="space-y-1.5 text-xs text-zinc-600 dark:text-zinc-400">
               <li>
-                <Link href="/" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                <Link
+                  href="/"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/notes" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                <Link
+                  href="/notes"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
                   Notes
                 </Link>
               </li>
               <li>
-                <Link href="/posts" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                  Community Feed
+                <Link
+                  href="/posts"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
+                  Community
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                  About Us
+                <Link
+                  href="/about"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
+                  About
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                  Contact Us
+                <Link
+                  href="/contact"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
+                  Contact
                 </Link>
               </li>
             </ul>
@@ -74,23 +89,33 @@ export default function Footer() {
           {/* Core Modules */}
           <div className="space-y-2">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
-              System Modules
+              Features
             </h4>
             <ul className="space-y-1.5 text-xs text-zinc-600 dark:text-zinc-400">
               <li>
-                <span className="text-zinc-500 dark:text-zinc-500">Status & Priority Lifecycle</span>
+                <span className="text-zinc-500 dark:text-zinc-500">
+                  Priority Notes & Timers
+                </span>
               </li>
               <li>
-                <span className="text-zinc-500 dark:text-zinc-500">Dual-Tier Privacy Posts</span>
+                <span className="text-zinc-500 dark:text-zinc-500">
+                  Public & Member Feeds
+                </span>
               </li>
               <li>
-                <span className="text-zinc-500 dark:text-zinc-500">Real-Time Post Reactions</span>
+                <span className="text-zinc-500 dark:text-zinc-500">
+                  Live Reactions
+                </span>
               </li>
               <li>
-                <span className="text-zinc-500 dark:text-zinc-500">Interest Grouping Aggregations</span>
+                <span className="text-zinc-500 dark:text-zinc-500">
+                  Topic Circles
+                </span>
               </li>
               <li>
-                <span className="text-zinc-500 dark:text-zinc-500">6-Digit Email OTP Security</span>
+                <span className="text-zinc-500 dark:text-zinc-500">
+                  Passwordless OTP Sign-in
+                </span>
               </li>
             </ul>
           </div>

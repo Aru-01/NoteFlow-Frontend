@@ -1,12 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
-import { ArrowRight, ShieldCheck, Mail, Lock, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import {
+  ArrowRight,
+  ShieldCheck,
+  Mail,
+  Lock,
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 function LoginContent() {
@@ -18,18 +27,21 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [infoMsg, setInfoMsg] = useState("");
-
-  useEffect(() => {
-    if (searchParams.get("verified") === "true") {
-      setInfoMsg("Your email has been verified successfully. You can now log in.");
-    } else if (searchParams.get("reset") === "true") {
-      setInfoMsg("Your password has been reset successfully. You can now log in with your new password.");
-    } else if (searchParams.get("session_expired") === "true") {
-      setError("Your session has expired. Please sign in again.");
+  const [error, setError] = useState(() => {
+    if (searchParams.get("session_expired") === "true") {
+      return "Your session has expired. Please sign in again.";
     }
-  }, [searchParams]);
+    return "";
+  });
+  const [infoMsg, setInfoMsg] = useState(() => {
+    if (searchParams.get("verified") === "true") {
+      return "Your email has been verified successfully. You can now log in.";
+    }
+    if (searchParams.get("reset") === "true") {
+      return "Your password has been reset successfully. You can now log in with your new password.";
+    }
+    return "";
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,7 +70,7 @@ function LoginContent() {
               >
                 Verify OTP now &rarr;
               </Link>
-            </span>
+            </span>,
           );
         } else {
           setError(resp.detail);
@@ -66,7 +78,9 @@ function LoginContent() {
       } else if (resp?.email) {
         setError(Array.isArray(resp.email) ? resp.email[0] : resp.email);
       } else if (resp?.password) {
-        setError(Array.isArray(resp.password) ? resp.password[0] : resp.password);
+        setError(
+          Array.isArray(resp.password) ? resp.password[0] : resp.password,
+        );
       } else {
         setError("Invalid email or password. Please try again.");
       }
@@ -134,7 +148,11 @@ function LoginContent() {
                   Password
                 </label>
                 <Link
-                  href={email ? `/forgot-password?email=${encodeURIComponent(email.trim())}` : "/forgot-password"}
+                  href={
+                    email
+                      ? `/forgot-password?email=${encodeURIComponent(email.trim())}`
+                      : "/forgot-password"
+                  }
                   className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   Forgot?
@@ -157,7 +175,11 @@ function LoginContent() {
                   tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -176,7 +198,10 @@ function LoginContent() {
           <div className="mt-6 pt-5 border-t border-zinc-200 dark:border-zinc-800 text-center">
             <p className="text-xs text-zinc-600 dark:text-zinc-400">
               Don&apos;t have an account yet?{" "}
-              <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+              <Link
+                href="/register"
+                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              >
                 Create one now
               </Link>
             </p>
@@ -184,7 +209,7 @@ function LoginContent() {
 
           <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-zinc-500">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Protected by JWT & OTP 2-Factor Guard</span>
+            <span>Secure, encrypted sign-in</span>
           </div>
         </GlassCard>
       </motion.div>
@@ -194,7 +219,13 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex-1 flex items-center justify-center p-8 text-xs text-zinc-500">Loading sign-in...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex-1 flex items-center justify-center p-8 text-xs text-zinc-500">
+          Loading sign-in...
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );

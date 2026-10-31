@@ -1,70 +1,76 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
-import { 
-  FileText, 
-  Users, 
-  ShieldCheck, 
-  Database, 
-  PieChart, 
-  KeyRound, 
-  Layers, 
-  Server, 
+import {
+  FileText,
+  Users,
+  ShieldCheck,
+  Database,
+  PieChart,
+  KeyRound,
+  Layers,
+  Server,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import GithubIcon from "@/components/ui/GithubIcon";
 
 export default function AboutPage() {
   const projectModules = [
     {
-      title: "1. Structured Notes Engine",
-      badge: "CRUD & Lifecycle",
+      title: "1. Structured Notes & Timers",
+      badge: "Workflow",
       icon: FileText,
       description:
-        "Full-featured note workspace where notes are tied to authenticated owners. Features 4 priority tiers (Low, Medium, High, Urgent), 4 lifecycle statuses (Pending, Started, In Progress, Completed), and planned start and approximate completion dates.",
-      technicalDetail: "Backed by compound database index (owner, -created_at) ensuring sub-10ms retrieval even under heavy data volume.",
+        "Organize work with four priority levels (Low to Urgent), clear progress stages (Pending to Completed), and live countdowns for target dates.",
+      technicalDetail:
+        "Engineered for speed—indexed queries load your workspace in milliseconds, even as your archive grows.",
     },
     {
-      title: "2. Dual-Privacy Community Feed",
-      badge: "Public & In-App",
+      title: "2. Public & Member-Only Visibility",
+      badge: "Sharing",
       icon: Users,
       description:
-        "Content publishing system with dual visibility control. Public posts can be viewed by anyone, while Authenticated posts are strictly guarded for verified platform members. Includes author attribution and relational linking.",
-      technicalDetail: "Protected at the ORM and serializer level; anonymous requests are automatically restricted from in-app records.",
+        "Publish openly to the web or keep conversations strictly within the signed-in community—giving every post the right audience.",
+      technicalDetail:
+        "Privacy rules are enforced directly on the server, ensuring member-only posts stay strictly private.",
     },
     {
-      title: "3. Atomic Post Reactions",
-      badge: "Interactive Toggle",
+      title: "3. Instant Reactions",
+      badge: "Engagement",
       icon: Layers,
       description:
-        "Real-time reaction system allowing verified users to react to posts (like, love, clap). Features idempotent toggle logic—clicking the same reaction removes it, while switching updates the reaction type.",
-      technicalDetail: "Enforces unique_together (post, user) constraint and atomically updates the aggregate react_count field.",
+        "Express feedback with single-click reactions (Like). Switch or undo reactions anytime with instant live counts..",
+      technicalDetail:
+        "Conflict-free syncing ensures accurate reaction counts without page reloads.",
     },
     {
-      title: "4. Smart Topic Discovery & Relational Joins",
-      badge: "Discovery Hub",
+      title: "4. Topic Circles & Profiles",
+      badge: "Community",
       icon: PieChart,
       description:
-        "High-performance query engine matching users by shared topic arrays into collaborative interest circles, paired with relational joins retrieving comprehensive author activity histories.",
-      technicalDetail: "Optimized through indexed grouping and Django select_related single-query joins with composite index (author, -created_at).",
+        "Connect effortlessly with people who care about the same subjects. Shared interest tags automatically group members into active circles.",
+      technicalDetail:
+        "Smart relational queries surface relevant authors, posts, and topic groups in a single fast request.",
     },
     {
-      title: "5. Dual-Layer Auth & OTP Verification",
-      badge: "Security & RBAC",
+      title: "5. Role Controls",
+      badge: "Security",
       icon: ShieldCheck,
       description:
-        "Custom AbstractUser with email as primary credential. Role-Based Access Control differentiates regular Users from Administrators. Registrations require 6-digit numeric OTP email verification before login is permitted.",
-      technicalDetail: "OTPs expire in 5 minutes and are purged on consumption. Session tokens are managed via SimpleJWT with sliding rotation.",
+        "Every account is verified with a quick 6-digit email code, paired with dedicated workspace permissions for regular members and admins.",
+      technicalDetail:
+        "Protected by short-lived 5-minute verification codes and rotating secure sessions.",
     },
     {
-      title: "6. Performance & Throttling",
-      badge: "Infrastructure",
+      title: "6. Built-In Rate Protection & Clean API",
+      badge: "Reliability",
       icon: Server,
       description:
-        "Configured rate limiting (100 req/min for anonymous visitors, 500 req/min for authenticated users) to prevent API abuse, paired with OpenAPI/Swagger interactive documentation.",
-      technicalDetail: "Drf-spectacular documentation schema available at /api/v1/docs/ with full parameter annotations.",
+        "Designed to stay responsive and abuse-free around the clock, backed by structured API endpoints and clear standards.",
+      technicalDetail:
+        "Smart request throttling keeps traffic smooth for both guests and signed-in members.",
     },
   ];
 
@@ -79,15 +85,15 @@ export default function AboutPage() {
         {/* Header */}
         <div className="space-y-2 border-b border-zinc-200 dark:border-zinc-800 pb-8">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300">
-            <span>Project Specification</span>
+            <span>Inside NoteFlow</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            NoteFlow Architecture & Modules
+            Thoughtful software, engineered for everyday use.
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-            NoteFlow is a production-grade full-stack platform combining a secure Django REST Framework
-            backend with an optimized Next.js 16 client. Below is a detailed breakdown of the real
-            features and technical modules implemented in this system.
+            NoteFlow brings personal task management and community discussions
+            under one roof—designed to feel effortless on the surface and
+            rock-solid underneath
           </p>
         </div>
 
@@ -96,7 +102,11 @@ export default function AboutPage() {
           {projectModules.map((module) => {
             const Icon = module.icon;
             return (
-              <GlassCard key={module.title} hoverEffect={false} className="flex flex-col justify-between space-y-3">
+              <GlassCard
+                key={module.title}
+                hoverEffect={false}
+                className="flex flex-col justify-between space-y-3"
+              >
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex items-center justify-center">
@@ -116,7 +126,10 @@ export default function AboutPage() {
 
                 <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
                   <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 block">
-                    <strong className="text-zinc-700 dark:text-zinc-300">Optimization:</strong> {module.technicalDetail}
+                    <strong className="text-zinc-700 dark:text-zinc-300">
+                      Optimization:
+                    </strong>{" "}
+                    {module.technicalDetail}
                   </span>
                 </div>
               </GlassCard>
@@ -127,24 +140,40 @@ export default function AboutPage() {
         {/* Technology Stack Specifications */}
         <div className="p-6 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 space-y-4">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">
-            Full-Stack Technology Stack
+            Powered By Modern Web Standards
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
             <div className="space-y-1">
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">Backend Framework</span>
-              <p className="text-zinc-600 dark:text-zinc-400">Django 5.2 + Django REST Framework</p>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">
+                Backend
+              </span>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Django & Django REST Framework
+              </p>
             </div>
             <div className="space-y-1">
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">Authentication</span>
-              <p className="text-zinc-600 dark:text-zinc-400">SimpleJWT + 6-digit Email OTP + RBAC</p>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">
+                Security
+              </span>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Email OTP Verification & JWT Sessions
+              </p>
             </div>
             <div className="space-y-1">
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">Frontend Framework</span>
-              <p className="text-zinc-600 dark:text-zinc-400">Next.js 16 (App Router) + Tailwind v4</p>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">
+                Frontend
+              </span>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Next.js 16 & Tailwind CSS
+              </p>
             </div>
             <div className="space-y-1">
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">UX & Interaction</span>
-              <p className="text-zinc-600 dark:text-zinc-400">Lenis Smooth Scroll + Framer Motion</p>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">
+                Experience
+              </span>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Framer Motion & Smooth Scroll
+              </p>
             </div>
           </div>
         </div>
@@ -153,10 +182,11 @@ export default function AboutPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121215]">
           <div>
             <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">
-              Project Developer & Maintainer
+              Designed & Built by Arif
             </h4>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
-              Architected and built by Arif (<a href="https://github.com/aru-01" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">@aru-01</a>).
+              Crafted independently with a focus on clean design, fast
+              performance, and practical everyday utility.
             </p>
           </div>
           <a
@@ -166,7 +196,7 @@ export default function AboutPage() {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white transition-colors"
           >
             <GithubIcon className="w-4 h-4" />
-            <span>View GitHub Repository</span>
+            <span>Explore on GitHub</span>
             <ExternalLink className="w-3 h-3 opacity-60" />
           </a>
         </div>

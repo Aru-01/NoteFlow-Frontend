@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Users, 
-  Heart, 
-  Globe, 
-  Lock, 
-  Plus, 
-  Search, 
-  Filter, 
-  Trash2, 
-  Edit3, 
-  RefreshCw, 
-  AlertCircle, 
-  CheckCircle2, 
+import {
+  Users,
+  Heart,
+  Globe,
+  Lock,
+  Plus,
+  Search,
+  Filter,
+  Trash2,
+  Edit3,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
   X,
   AlertTriangle,
   ChevronLeft,
@@ -25,7 +25,7 @@ import {
   Tag,
   Sparkles,
   PieChart,
-  MessageSquare
+  MessageSquare,
 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
@@ -52,7 +52,9 @@ function PostsContent() {
   // Filtering states
   const [searchQuery, setSearchQuery] = useState("");
   const [privacyFilter, setPrivacyFilter] = useState("all");
-  const [authorFilter, setAuthorFilter] = useState(searchParams.get("author_id") || "");
+  const [authorFilter, setAuthorFilter] = useState(
+    searchParams.get("author_id") || "",
+  );
 
   // Pagination
   const [pagination, setPagination] = useState({
@@ -71,8 +73,8 @@ function PostsContent() {
   const [formError, setFormError] = useState("");
   const [reactingPostId, setReactingPostId] = useState(null);
 
-  // Fetch posts from Django backend
-  const fetchPosts = useCallback(async (page = 1) => {
+  // Manual & Paginated fetch
+  const fetchPosts = async (page = 1) => {
     setIsLoading(true);
     setError("");
 
@@ -83,11 +85,12 @@ function PostsContent() {
       if (authorFilter.trim()) params.author_id = authorFilter.trim();
 
       const res = await api.get(ENDPOINTS.POSTS.LIST_CREATE, { params });
-      const results = res.data?.results !== undefined 
-        ? res.data.results 
-        : Array.isArray(res.data) 
-        ? res.data 
-        : [];
+      const results =
+        res.data?.results !== undefined
+          ? res.data.results
+          : Array.isArray(res.data)
+            ? res.data
+            : [];
 
       setPosts(results);
       setPagination({
@@ -97,13 +100,15 @@ function PostsContent() {
         current: page,
       });
     } catch (err) {
-      setError("Failed to load community feed. Please check backend connection.");
+      setError(
+        "Failed to load community feed. Please check backend connection.",
+      );
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, privacyFilter, authorFilter]);
+  };
 
-  // Fetch Scenario 1: Group by Interests Aggregations
+  // Fetch Topic Discovery Groups
   const fetchInterestGroups = async () => {
     setIsLoadingGroups(true);
     try {
@@ -116,10 +121,64 @@ function PostsContent() {
     }
   };
 
+  // Initial and reactive data fetch
   useEffect(() => {
-    fetchPosts(1);
-    fetchInterestGroups();
-  }, [fetchPosts]);
+    let ignore = false;
+
+    const loadData = async () => {
+      try {
+        const params = { page: 1 };
+        if (searchQuery.trim()) params.search = searchQuery.trim();
+        if (privacyFilter !== "all") params.privacy = privacyFilter;
+        if (authorFilter.trim()) params.author_id = authorFilter.trim();
+
+        const [postsRes, groupsRes] = await Promise.allSettled([
+          api.get(ENDPOINTS.POSTS.LIST_CREATE, { params }),
+          api.get(ENDPOINTS.POSTS.GROUP_BY_INTERESTS),
+        ]);
+
+        if (ignore) return;
+
+        if (postsRes.status === "fulfilled") {
+          const res = postsRes.value;
+          const results =
+            res.data?.results !== undefined
+              ? res.data.results
+              : Array.isArray(res.data)
+                ? res.data
+                : [];
+          setPosts(results);
+          setPagination({
+            count: res.data?.count || results.length,
+            next: res.data?.next || null,
+            previous: res.data?.previous || null,
+            current: 1,
+          });
+          setError("");
+        } else {
+          setError(
+            "Failed to load community feed. Please check backend connection.",
+          );
+        }
+
+        if (groupsRes.status === "fulfilled") {
+          const res = groupsRes.value;
+          setInterestGroups(Array.isArray(res.data) ? res.data : []);
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+          setIsLoadingGroups(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [searchQuery, privacyFilter, authorFilter]);
 
   // Handle post reaction toggle
   const handleToggleReaction = async (postId) => {
@@ -143,11 +202,12 @@ function PostsContent() {
             return {
               ...p,
               has_reacted: reacted,
-              react_count: react_count !== undefined ? react_count : p.react_count,
+              react_count:
+                react_count !== undefined ? react_count : p.react_count,
             };
           }
           return p;
-        })
+        }),
       );
     } catch (err) {
       // Rollback
@@ -209,7 +269,7 @@ function PostsContent() {
           privacy: privacy,
         });
         setPosts((prev) =>
-          prev.map((p) => (p.id === selectedPost.id ? res.data : p))
+          prev.map((p) => (p.id === selectedPost.id ? res.data : p)),
         );
         setSuccessMsg("Post updated successfully!");
       }
@@ -219,7 +279,9 @@ function PostsContent() {
     } catch (err) {
       const resp = err.response?.data;
       if (resp?.caption) {
-        setFormError(Array.isArray(resp.caption) ? resp.caption[0] : resp.caption);
+        setFormError(
+          Array.isArray(resp.caption) ? resp.caption[0] : resp.caption,
+        );
       } else if (resp?.detail) {
         setFormError(resp.detail);
       } else {
@@ -254,18 +316,12 @@ function PostsContent() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-zinc-200 dark:border-zinc-800">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-semibold">
-              Live API
-            </span>
-            <span className="text-xs text-zinc-400">•</span>
-            <span className="text-xs text-zinc-500 font-mono">/api/v1/posts/</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white mt-1">
             Community Feed
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5">
-            Public community perspectives & authenticated discussions with real-time reaction toggle.
+            Read open posts from creators or sign in to join member-only
+            discussions.
           </p>
         </div>
 
@@ -279,7 +335,12 @@ function PostsContent() {
           >
             Refresh
           </Button>
-          <Button variant="primary" size="sm" icon={Plus} onClick={handleOpenCreate}>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={Plus}
+            onClick={handleOpenCreate}
+          >
             Share a Thought
           </Button>
         </div>
@@ -370,7 +431,10 @@ function PostsContent() {
               ))}
             </div>
           ) : posts.length === 0 ? (
-            <GlassCard hoverEffect={false} className="p-12 text-center space-y-4">
+            <GlassCard
+              hoverEffect={false}
+              className="p-12 text-center space-y-4"
+            >
               <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center mx-auto">
                 <MessageSquare className="w-6 h-6" />
               </div>
@@ -383,7 +447,12 @@ function PostsContent() {
                 </p>
               </div>
               <div className="pt-2">
-                <Button variant="primary" size="sm" icon={Plus} onClick={handleOpenCreate}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={handleOpenCreate}
+                >
                   Share the First Post
                 </Button>
               </div>
@@ -404,16 +473,21 @@ function PostsContent() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold flex items-center justify-center text-xs">
-                          {(post.author?.username || post.author?.email || "U")[0].toUpperCase()}
+                          {(post.author?.username ||
+                            post.author?.email ||
+                            "U")[0].toUpperCase()}
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">
-                              {post.author?.username || post.author?.email?.split("@")[0]}
+                              {post.author?.username ||
+                                post.author?.email?.split("@")[0]}
                             </span>
                             {post.author?.id && (
                               <button
-                                onClick={() => setAuthorFilter(String(post.author.id))}
+                                onClick={() =>
+                                  setAuthorFilter(String(post.author.id))
+                                }
                                 title="Filter posts by this author"
                                 className="text-[10px] text-zinc-400 hover:text-blue-500 font-mono"
                               >
@@ -455,18 +529,19 @@ function PostsContent() {
                     </p>
 
                     {/* Author Interest Tags */}
-                    {post.author?.interests && post.author.interests.length > 0 && (
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        {post.author.interests.map((interest) => (
-                          <span
-                            key={interest}
-                            className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 text-[10px] text-zinc-600 dark:text-zinc-400 font-medium"
-                          >
-                            #{interest}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {post.author?.interests &&
+                      post.author.interests.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {post.author.interests.map((interest) => (
+                            <span
+                              key={interest}
+                              className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 text-[10px] text-zinc-600 dark:text-zinc-400 font-medium"
+                            >
+                              #{interest}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                     {/* Footer Actions */}
                     <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs text-zinc-500">
@@ -482,7 +557,9 @@ function PostsContent() {
                       >
                         <Heart
                           className={`w-3.5 h-3.5 ${
-                            post.has_reacted ? "fill-rose-500 text-rose-500" : ""
+                            post.has_reacted
+                              ? "fill-rose-500 text-rose-500"
+                              : ""
                           }`}
                         />
                         <span>{post.react_count || 0}</span>
@@ -555,16 +632,13 @@ function PostsContent() {
               <div className="flex items-center gap-2">
                 <PieChart className="w-4 h-4 text-blue-500" />
                 <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
-                  Interest Circles
+                  Active Topics
                 </h3>
               </div>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-blue-500 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/60">
-                Active Circles
-              </span>
             </div>
 
             <p className="text-xs text-zinc-500 leading-relaxed">
-              Real-time aggregation pipeline grouping community members by shared interest arrays.
+              Discover members sharing similar interests across the community.
             </p>
 
             {isLoadingGroups ? (
@@ -575,7 +649,10 @@ function PostsContent() {
             ) : interestGroups.length === 0 ? (
               <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 text-center text-xs text-zinc-500">
                 No interest groups formed yet. Add interests in your{" "}
-                <Link href="/profile" className="text-blue-500 underline font-medium">
+                <Link
+                  href="/profile"
+                  className="text-blue-500 underline font-medium"
+                >
                   Profile
                 </Link>{" "}
                 to start circles!
@@ -592,7 +669,8 @@ function PostsContent() {
                         #{group.interest}
                       </span>
                       <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
-                        {group.user_count} {group.user_count === 1 ? "member" : "members"}
+                        {group.user_count}{" "}
+                        {group.user_count === 1 ? "member" : "members"}
                       </span>
                     </div>
 
@@ -617,11 +695,11 @@ function PostsContent() {
           {/* Quick Info Box */}
           <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 text-xs text-zinc-500 space-y-2">
             <h4 className="font-semibold text-zinc-800 dark:text-zinc-200">
-              Dual Privacy Architecture
+              Two ways to share
             </h4>
             <p className="leading-relaxed">
-              Public posts are visible to any unauthenticated visitor, while In-App Member posts are
-              strictly gated behind JWT session verification.
+              Public posts are open for anyone visiting NoteFlow. Member posts
+              are visible only to signed-in community members.
             </p>
           </div>
         </div>
@@ -729,7 +807,9 @@ function PostsContent() {
                     size="sm"
                     isLoading={isSubmitting}
                   >
-                    {modalMode === "create" ? "Publish Thought" : "Save Changes"}
+                    {modalMode === "create"
+                      ? "Publish Thought"
+                      : "Save Changes"}
                   </Button>
                 </div>
               </form>
@@ -806,7 +886,13 @@ function PostsContent() {
 
 export default function PostsPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-xs text-zinc-500">Loading community feed...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-12 text-center text-xs text-zinc-500">
+          Loading community feed...
+        </div>
+      }
+    >
       <PostsContent />
     </Suspense>
   );

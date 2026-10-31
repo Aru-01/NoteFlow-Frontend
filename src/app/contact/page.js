@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
-import { Mail, Send, CheckCircle2, MessageSquare, Terminal } from "lucide-react";
+import {
+  Mail,
+  Send,
+  CheckCircle2,
+  MessageSquare,
+  Terminal,
+} from "lucide-react";
 import GithubIcon from "@/components/ui/GithubIcon";
 
 export default function ContactPage() {
@@ -21,13 +27,14 @@ export default function ContactPage() {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300">
             <Mail className="w-3.5 h-3.5" />
-            <span>Developer Support</span>
+            <span>Get in Touch</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Contact & Feedback
+            How could i help?
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
-            Submit questions regarding NoteFlow API integration, bug reports, or feature requests.
+            Have a question, spotted a bug, or want to suggest a new feature?
+            Send a message and we’ll get back to you soon.
           </p>
         </div>
 
@@ -41,9 +48,14 @@ export default function ContactPage() {
                 Inquiry Received
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
-                Thank you for your feedback. We will review your note and respond promptly.
+                Thank you for your feedback. We will review your note and
+                respond promptly.
               </p>
-              <Button variant="secondary" size="sm" onClick={() => setSubmitted(false)}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setSubmitted(false)}
+              >
                 Submit Another Message
               </Button>
             </div>
@@ -88,7 +100,9 @@ export default function ContactPage() {
                   <option value="notes">Notes Engine & Search</option>
                   <option value="auth">OTP Verification & JWT Auth</option>
                   <option value="feed">Community Feed & Reactions</option>
-                  <option value="aggregations">Interest Grouping Aggregations</option>
+                  <option value="aggregations">
+                    Interest Grouping Aggregations
+                  </option>
                   <option value="general">General Inquiry</option>
                 </select>
               </div>
@@ -115,7 +129,13 @@ export default function ContactPage() {
                   <GithubIcon className="w-3.5 h-3.5" />
                   <span>Developer: @aru-01</span>
                 </a>
-                <Button type="submit" variant="primary" size="sm" icon={Send} className="w-full sm:w-auto">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  icon={Send}
+                  className="w-full sm:w-auto"
+                >
                   Submit Note
                 </Button>
               </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -59,7 +59,7 @@ export default function AdminUserDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch all data for this specific user
-  const fetchUserData = useCallback(async () => {
+  const fetchUserData = async () => {
     if (!userId || !isAdmin) return;
 
     setIsLoading(true);
@@ -96,15 +96,58 @@ export default function AdminUserDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, isAdmin]);
+  };
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchUserData();
-    } else {
-      setIsLoading(false);
+    let ignore = false;
+
+    if (!isAdmin || !userId) {
+      return;
     }
-  }, [isAdmin, fetchUserData]);
+
+    const loadUserData = async () => {
+      try {
+        const [userRes, notesRes, postsRes] = await Promise.all([
+          api.get(`${ENDPOINTS.AUTH.ADMIN_USERS}${userId}/`),
+          api.get(ENDPOINTS.NOTES.LIST_CREATE, { params: { user_id: userId } }),
+          api.get(ENDPOINTS.POSTS.LIST_CREATE, { params: { author_id: userId } }),
+        ]);
+
+        if (ignore) return;
+
+        setTargetUser(userRes.data);
+
+        const notesList = notesRes.data?.results !== undefined 
+          ? notesRes.data.results 
+          : Array.isArray(notesRes.data) 
+          ? notesRes.data 
+          : [];
+        setUserNotes(notesList);
+
+        const postsList = postsRes.data?.results !== undefined 
+          ? postsRes.data.results 
+          : Array.isArray(postsRes.data) 
+          ? postsRes.data 
+          : [];
+        setUserPosts(postsList);
+        setError("");
+      } catch (err) {
+        if (!ignore) {
+          setError("Failed to load user activity or user does not exist.");
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadUserData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [userId, isAdmin]);
 
   // Toggle user role
   const handleToggleRole = async () => {

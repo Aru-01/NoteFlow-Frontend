@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -6,7 +6,18 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
-import { ArrowRight, ShieldCheck, Mail, Lock, User, Tag, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import {
+  ArrowRight,
+  ShieldCheck,
+  Mail,
+  Lock,
+  User,
+  Tag,
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
@@ -67,13 +78,16 @@ export default function RegisterPage() {
     try {
       const res = await register(payload);
       setSuccessMsg(
-        res?.message || "Registration successful! A 6-digit verification OTP has been sent."
+        res?.message ||
+          "Registration successful! A 6-digit verification OTP has been sent.",
       );
       // Store registered email for OTP page auto-population
       sessionStorage.setItem("noteflow_verify_email", formData.email.trim());
 
       setTimeout(() => {
-        router.push(`/verify-otp?email=${encodeURIComponent(formData.email.trim())}`);
+        router.push(
+          `/verify-otp?email=${encodeURIComponent(formData.email.trim())}`,
+        );
       }, 1500);
     } catch (err) {
       const responseData = err.response?.data;
@@ -81,16 +95,22 @@ export default function RegisterPage() {
         if (typeof responseData === "string") {
           setError(responseData);
         } else if (responseData.email) {
-          setError(Array.isArray(responseData.email) ? responseData.email[0] : responseData.email);
+          setError(
+            Array.isArray(responseData.email)
+              ? responseData.email[0]
+              : responseData.email,
+          );
         } else if (responseData.password) {
           setError(
-            Array.isArray(responseData.password) ? responseData.password[0] : responseData.password
+            Array.isArray(responseData.password)
+              ? responseData.password[0]
+              : responseData.password,
           );
         } else if (responseData.confirm_password) {
           setError(
             Array.isArray(responseData.confirm_password)
               ? responseData.confirm_password[0]
-              : responseData.confirm_password
+              : responseData.confirm_password,
           );
         } else if (responseData.detail) {
           setError(responseData.detail);
@@ -119,10 +139,10 @@ export default function RegisterPage() {
               NF
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
-              Create your account
+              Get started with NoteFlow
             </h1>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
-              Join NoteFlow with email OTP verification & interest matching
+              Start organizing your notes, deadlines, and favorite topics.
             </p>
           </div>
 
@@ -197,9 +217,15 @@ export default function RegisterPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                     tabIndex={-1}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -223,9 +249,15 @@ export default function RegisterPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3.5 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                     tabIndex={-1}
-                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showConfirmPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -262,7 +294,10 @@ export default function RegisterPage() {
           <div className="mt-5 pt-4 border-t border-zinc-200 dark:border-zinc-800 text-center">
             <p className="text-xs text-zinc-600 dark:text-zinc-400">
               Already have an account?{" "}
-              <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+              <Link
+                href="/login"
+                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              >
                 Sign in here
               </Link>
             </p>
@@ -270,7 +305,7 @@ export default function RegisterPage() {
 
           <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-zinc-500">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-            <span>A 6-digit OTP will be sent to your email to verify</span>
+            <span>We’ll send a 6-digit verification code to your email.</span>
           </div>
         </GlassCard>
       </motion.div>

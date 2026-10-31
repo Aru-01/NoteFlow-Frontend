@@ -1,7 +1,65 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { Clock, AlertCircle } from "lucide-react";
+
+const emptySubscribe = () => () => {};
+function useMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
+
+function calculateTimeRemaining(dateStr) {
+  if (!dateStr) {
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      isOverdue: false,
+      hasTarget: false,
+    };
+  }
+
+  const target = new Date(`${dateStr}T23:59:59`).getTime();
+  const now = Date.now();
+
+  if (isNaN(target)) {
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      isOverdue: false,
+      hasTarget: false,
+    };
+  }
+
+  const difference = target - now;
+
+  if (difference <= 0) {
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      isOverdue: true,
+      hasTarget: true,
+    };
+  }
+
+  return {
+    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((difference / 1000 / 60) % 60),
+    seconds: Math.floor((difference / 1000) % 60),
+    isOverdue: false,
+    hasTarget: true,
+  };
+}
 
 /**
  * Real-time Countdown Timer for Note Deadlines (approx_end_date)
@@ -9,65 +67,16 @@ import { Clock, AlertCircle } from "lucide-react";
  */
 export default function CountdownTimer({ targetDate, approxEndDate, compact = false }) {
   const effectiveDate = targetDate || approxEndDate;
-  const [mounted, setMounted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    isOverdue: false,
-    hasTarget: false,
-  });
+  const mounted = useMounted();
+  const [timeLeft, setTimeLeft] = useState(() => calculateTimeRemaining(effectiveDate));
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (!effectiveDate) return;
 
-  useEffect(() => {
-    if (!effectiveDate) {
-      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isOverdue: false, hasTarget: false });
-      return;
-    }
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeRemaining(effectiveDate));
+    }, 1000);
 
-    const calculateTime = () => {
-      // Set target to the end of the deadline day (23:59:59 local time)
-      const target = new Date(`${effectiveDate}T23:59:59`).getTime();
-      const now = new Date().getTime();
-      const difference = target - now;
-
-      if (isNaN(target)) {
-        return;
-      }
-
-      if (difference <= 0) {
-        setTimeLeft({
-          days: 0,
-          hours: 0,
-          minutes: 0,
-          seconds: 0,
-          isOverdue: true,
-          hasTarget: true,
-        });
-        return;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / 1000 / 60) % 60);
-      const seconds = Math.floor((difference / 1000) % 60);
-
-      setTimeLeft({
-        days,
-        hours,
-        minutes,
-        seconds,
-        isOverdue: false,
-        hasTarget: true,
-      });
-    };
-
-    calculateTime();
-    const interval = setInterval(calculateTime, 1000);
     return () => clearInterval(interval);
   }, [effectiveDate]);
 
@@ -120,4 +129,3 @@ export default function CountdownTimer({ targetDate, approxEndDate, compact = fa
     </div>
   );
 }
-

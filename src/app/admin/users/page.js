@@ -61,11 +61,37 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchUsers();
-    } else {
-      setIsLoading(false);
+    let ignore = false;
+
+    if (!isAdmin) {
+      return;
     }
+
+    const loadUsers = async () => {
+      try {
+        const res = await api.get(ENDPOINTS.AUTH.ADMIN_USERS);
+        if (ignore) return;
+        const data = res.data?.results || res.data || [];
+        setUsersList(data);
+        setError("");
+      } catch (err) {
+        if (!ignore) {
+          setError(
+            "Failed to fetch users from backend. Please verify your admin credentials.",
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadUsers();
+
+    return () => {
+      ignore = true;
+    };
   }, [isAdmin]);
 
   // Toggle user role (Admin <-> User)
